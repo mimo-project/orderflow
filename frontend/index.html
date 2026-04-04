@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OrderFlow — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .auth-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .auth-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .auth-subtitle { text-align:center; color:var(--muted); font-size:13px; margin-bottom:28px; }
+    .auth-tabs { display:flex; margin-bottom:24px; border-bottom:1px solid var(--border); }
+    .auth-tab {
+      flex:1; background:none; border:none;
+      border-bottom:2px solid transparent;
+      color:var(--muted); font-size:13px; font-weight:500;
+      padding:8px 0; margin-bottom:-1px; cursor:pointer;
+      font-family:inherit; transition:color 0.2s;
+    }
+    .auth-tab.active { color:var(--fg); border-bottom-color:var(--accent); font-weight:600; }
+    .auth-field { margin-bottom:14px; }
+    .auth-field label { display:block; font-size:11px; color:var(--muted); margin-bottom:5px; }
+    .auth-field input { width:100%; }
+    .auth-btn {
+      width:100%; background:var(--accent); color:#fff;
+      border:none; border-radius:8px; padding:11px;
+      font-weight:600; font-size:14px; cursor:pointer;
+      font-family:inherit; margin-top:6px; transition:opacity 0.15s;
+    }
+    .auth-btn:hover { opacity:0.88; }
+    .auth-error {
+      background:#e05a2b18; border:1px solid #e05a2b44;
+      color:#e05a2b; border-radius:8px; padding:10px 14px;
+      font-size:13px; margin-bottom:14px; display:none;
+    }
+    .auth-error.visible { display:block; }
+    .auth-success {
+      background:#22c55e18; border:1px solid #22c55e44;
+      color:#22c55e; border-radius:8px; padding:10px 14px;
+      font-size:13px; margin-bottom:14px; display:none;
+    }
+    .auth-success.visible { display:block; }
+  </style>
+</head>
+<body>
+  <div class="auth-box">
+    <div class="auth-title"><span class="accent">Order</span>Flow</div>
+    <div class="auth-subtitle">Delivery Prioritisation System</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin"    onclick="switchTab('login')">Login</button>
+      <button class="auth-tab"        id="tabRegister" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <div id="errorBox"   class="auth-error"></div>
+    <div id="successBox" class="auth-success"></div>
+
+    <div id="formLogin">
+      <div class="auth-field">
+        <label>Username</label>
+        <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username"/>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter') doLogin()"/>
+      </div>
+      <button class="auth-btn" onclick="doLogin()">Login</button>
+    </div>
+
+    <div id="formRegister" style="display:none">
+      <div class="auth-field">
+        <label>Username</label>
+        <input type="text" id="regUser" placeholder="Choose a username"/>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="regPass" placeholder="Min 6 characters"/>
+      </div>
+      <div class="auth-field">
+        <label>Confirm password</label>
+        <input type="password" id="regPass2" placeholder="Repeat password"
+               onkeydown="if(event.key==='Enter') doRegister()"/>
+      </div>
+      <button class="auth-btn" onclick="doRegister()">Create account</button>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (localStorage.getItem("token")) window.location.href = "dashboard.html";
+
+    function switchTab(tab) {
+      document.getElementById("tabLogin").classList.toggle("active", tab === "login");
+      document.getElementById("tabRegister").classList.toggle("active", tab === "register");
+      document.getElementById("formLogin").style.display    = tab === "login"    ? "block" : "none";
+      document.getElementById("formRegister").style.display = tab === "register" ? "block" : "none";
+      clearMessages();
+    }
+
+    function showError(msg)   { const b = document.getElementById("errorBox");   b.textContent = msg; b.classList.add("visible"); document.getElementById("successBox").classList.remove("visible"); }
+    function showSuccess(msg) { const b = document.getElementById("successBox"); b.textContent = msg; b.classList.add("visible"); document.getElementById("errorBox").classList.remove("visible"); }
+    function clearMessages()  { document.getElementById("errorBox").classList.remove("visible"); document.getElementById("successBox").classList.remove("visible"); }
+
+    async function doLogin() {
+      const username = document.getElementById("loginUser").value.trim();
+      const password = document.getElementById("loginPass").value.trim();
+      if (!username || !password) return showError("Please fill in both fields.");
+
+      try {
+        const res  = await fetch(API_BASE + "/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) return showError(data.error || "Login failed.");
+        localStorage.setItem("token",    data.token);
+        localStorage.setItem("username", data.username);
+        window.location.href = "dashboard.html";
+      } catch (e) {
+        showError("Cannot reach server. Is the backend running?");
+      }
+    }
+
+    async function doRegister() {
+      const username = document.getElementById("regUser").value.trim();
+      const password = document.getElementById("regPass").value.trim();
+      const confirm  = document.getElementById("regPass2").value.trim();
+      if (!username || !password) return showError("Please fill in all fields.");
+      if (password !== confirm)   return showError("Passwords do not match.");
+      if (password.length < 6)    return showError("Password must be at least 6 characters.");
+
+      try {
+        const res  = await fetch(API_BASE + "/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) return showError(data.error || "Registration failed.");
+        showSuccess("Account created! Logging you in...");
+        localStorage.setItem("token",    data.token);
+        localStorage.setItem("username", data.username);
+        setTimeout(() => window.location.href = "dashboard.html", 800);
+      } catch (e) {
+        showError("Cannot reach server. Is the backend running?");
+      }
+    }
+  </script>
+</body>
+</html>

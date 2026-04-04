@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OrderFlow — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- ── Header ───────────────────────────────────────────────── -->
+  <header>
+    <div class="header-brand">
+      <div class="header-title"><span class="accent">Order</span>Flow</div>
+      <div class="header-sub">E-Commerce Order Sorting &amp; Delivery Prioritisation System</div>
+    </div>
+    <div class="header-controls">
+      <div class="aging-status">
+        <div class="aging-dot" id="agingDot"></div>
+        Aging engine
+        <button class="toggle-btn" id="agingToggle">ON</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-left:20px;">
+        <span style="font-size:12px;color:var(--muted)" id="welcomeUser"></span>
+        <button class="btn-secondary" onclick="logout()" style="padding:4px 12px;font-size:12px;">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card" style="border-top-color:#e05a2b">
+        <div class="stat-value" id="statQueued">0</div>
+        <div class="stat-label">Orders in queue</div>
+        <div class="stat-sub" style="color:#e05a2b">heap-sorted</div>
+      </div>
+      <div class="stat-card" style="border-top-color:#22c55e">
+        <div class="stat-value" id="statDelivered">0</div>
+        <div class="stat-label">Dispatched</div>
+        <div class="stat-sub" style="color:#22c55e">total delivered</div>
+      </div>
+      <div class="stat-card" style="border-top-color:#f59e0b">
+        <div class="stat-value" id="statAvg">—</div>
+        <div class="stat-label">Avg priority</div>
+        <div class="stat-sub" style="color:#f59e0b">queue average</div>
+      </div>
+      <div class="stat-card" style="border-top-color:#8b5cf6">
+        <div class="stat-value" id="statTop">—</div>
+        <div class="stat-label">Next dispatch</div>
+        <div class="stat-sub" id="statTopName" style="color:#8b5cf6">—</div>
+      </div>
+    </div>
+
+    <!-- Add order + Dispatch -->
+    <div class="action-row">
+      <div class="card form-card">
+        <div class="section-label">Add new order</div>
+        <div class="form-grid-3">
+          <div class="field"><label>Type</label>
+            <select id="fType"><option value="express">Express</option><option value="standard">Standard</option><option value="economy">Economy</option></select>
+          </div>
+          <div class="field"><label>Zone</label>
+            <select id="fZone"><option value="A">Zone A</option><option value="B">Zone B</option><option value="C">Zone C</option></select>
+          </div>
+          <div class="field"><label>Tier</label>
+            <select id="fTier"><option value="premium">Premium</option><option value="regular">Regular</option><option value="basic">Basic</option></select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field"><label>Customer name</label><input type="text" id="fCustomer" placeholder="e.g. Aisha Rahman"/></div>
+          <div class="field"><label>Product</label><input type="text" id="fProduct" placeholder="e.g. Laptop"/></div>
+          <div class="field"><label>Quantity</label><input type="number" id="fQty" value="1" min="1" max="99"/></div>
+          <div class="field"><label>Amount (USD)</label><input type="number" id="fAmount" placeholder="e.g. 149.99" min="0" step="0.01"/></div>
+        </div>
+        <div class="form-btns">
+          <button class="btn-primary" onclick="addOrder()">+ Add Order</button>
+        </div>
+      </div>
+
+      <div class="card dispatch-card">
+        <div class="section-label">Dispatch</div>
+        <div id="dispatchPreview"><div class="muted center-text">Queue is empty</div></div>
+        <button class="btn-dispatch" id="btnDispatch" onclick="dispatchOrder()" disabled>🚚 Dispatch Top Order</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="queue">Queue (0)</button>
+      <button class="tab" data-tab="delivered">Delivered (0)</button>
+      <button class="tab" data-tab="heap">Heap view</button>
+      <button class="tab" data-tab="log">Activity log</button>
+    </div>
+
+    <div id="panelQueue" class="panel card">
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>Rank</th><th>Order ID</th><th>Customer</th><th>Product</th>
+          <th>Amount</th><th>Type</th><th>Zone</th><th>Tier</th>
+          <th>Priority</th><th></th>
+        </tr></thead>
+        <tbody id="queueBody"><tr><td colspan="10" class="empty-cell">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="panelDelivered" class="panel card hidden">
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>Order ID</th><th>Customer</th><th>Product</th><th>Amount</th>
+          <th>Type</th><th>Zone</th><th>Tier</th><th>Priority</th><th>Delivered</th>
+        </tr></thead>
+        <tbody id="deliveredBody"><tr><td colspan="9" class="empty-cell">No orders dispatched yet</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="panelHeap" class="panel card hidden" style="padding:24px;">
+      <p class="muted" style="margin-bottom:20px;font-size:12px;">
+        Max-heap tree structure — each parent has higher priority than its children. Root = next to dispatch.
+      </p>
+      <svg id="heapSvg" width="100%" style="overflow:visible;"></svg>
+    </div>
+
+    <div id="panelLog" class="panel card hidden" style="padding:16px;max-height:420px;overflow-y:auto;">
+      <div id="logList"><div class="muted center-text">No activity yet</div></div>
+    </div>
+
+    <div class="formula-bar">
+      <span class="fg bold">Priority formula:</span>
+      <span>type_score (Express=50 / Standard=25 / Economy=10)</span>
+      <span class="sep">+</span>
+      <span>zone_score (A=15 / B=10 / C=5)</span>
+      <span class="sep">+</span>
+      <span>tier_score (Premium=20 / Regular=10 / Basic=5)</span>
+      <span class="sep">+</span>
+      <span style="color:#f59e0b">age_factor (min × 0.4, capped at 30) ← aging engine</span>
+    </div>
+
+  </main>
+
+  <script src="config.js"></script>
+  <script src="heap.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
