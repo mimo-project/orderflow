@@ -79,6 +79,10 @@ async function loadOrders() {
   const res = await api("/orders");
   if (!res || !res.ok) return;
   heap.buildFrom(res.data);
+  if (res.data.length) {
+    const maxId = Math.max(...res.data.map(o => parseInt(o.id.replace("ORD-", "")) || 0));
+    if (maxId >= orderId) orderId = maxId + 1;
+  }
   renderAll();
 }
 
@@ -86,6 +90,7 @@ async function loadDelivered() {
   const res = await api("/orders/delivered");
   if (!res || !res.ok) return;
   renderDelivered(res.data);
+  document.getElementById("statDelivered").textContent = res.data.length;
 }
 
 // ── Add order ─────────────────────────────────────────────────────────
