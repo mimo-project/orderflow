@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OrderFlow — E-Commerce Delivery Prioritisation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Nav ───────────────────────────────────────────────────────── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .nav-brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--fg);
+      border-radius: 8px;
+      padding: 7px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Hero ──────────────────────────────────────────────────────── */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 60px;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: #e05a2b18;
+      border: 1px solid #e05a2b44;
+      color: var(--accent);
+      border-radius: 20px;
+      padding: 5px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(38px, 7vw, 72px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -2px;
+      max-width: 800px;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+
+    .hero-title .accent { color: var(--accent); }
+
+    .hero-sub {
+      font-size: clamp(14px, 2vw, 17px);
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 44px;
+      animation: fadeUp 0.6s ease 0.2s both;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      animation: fadeUp 0.6s ease 0.3s both;
+    }
+
+    .btn-get-started {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 32px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .btn-get-started:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    .btn-learn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 13px 28px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-learn:hover { border-color: var(--fg); color: var(--fg); }
+
+    /* ── Stats strip ───────────────────────────────────────────────── */
+    .stats-strip {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      animation: fadeUp 0.6s ease 0.4s both;
+    }
+
+    .strip-item {
+      flex: 1;
+      max-width: 220px;
+      text-align: center;
+      padding: 28px 20px;
+      border-right: 1px solid var(--border);
+    }
+
+    .strip-item:last-child { border-right: none; }
+
+    .strip-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .strip-label { font-size: 12px; color: var(--muted); }
+
+    /* ── Features ──────────────────────────────────────────────────── */
+    .features {
+      padding: 72px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .features-heading {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .features-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 26px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: #e05a2b55;
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #e05a2b18;
+      border: 1px solid #e05a2b33;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 18px;
+    }
+
+    .feature-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--fg);
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── How it works ──────────────────────────────────────────────── */
+    .how {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 72px 48px;
+    }
+
+    .how-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .how-heading {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .how-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 48px;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .step:last-child { border-bottom: none; }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #e05a2b18;
+      border: 1px solid #e05a2b44;
+      color: var(--accent);
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 6px;
+    }
+
+    .step-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    /* ── CTA ───────────────────────────────────────────────────────── */
+    .cta {
+      text-align: center;
+      padding: 80px 24px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .cta-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    .cta-sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 36px;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--card);
+      padding: 20px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── Animations ────────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .features { padding: 48px 20px; }
+      .how { padding: 48px 20px; }
+      .stats-strip { flex-wrap: wrap; }
+      .strip-item { border-right: none; border-bottom: 1px solid var(--border); max-width: 100%; }
+      footer { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-brand"><span class="accent">Order</span>Flow</div>
+    <button class="nav-btn" onclick="window.location.href='index.html'">Login</button>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1 class="hero-title">
+      Smart order sorting &amp;<br/>
+      <span class="accent">delivery prioritisation</span>
+    </h1>
+    <p class="hero-sub">
+      A full-stack system that uses a Max-Heap priority queue to automatically sort and dispatch e-commerce orders based on type, zone, tier, and wait time.
+    </p>
+    <div class="hero-btns">
+      <button class="btn-get-started" onclick="window.location.href='index.html'">Get Started</button>
+      <button class="btn-learn" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Learn More</button>
+    </div>
+  </section>
+
+  <!-- Stats strip -->
+  
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="features-heading">Everything in one system</div>
+    <div class="features-sub">Built with Flask, SQLite, and vanilla JS — no frameworks needed</div>
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Max-Heap priority queue</div>
+        <div class="feature-desc">Orders are inserted and extracted in O(log n) time using a custom Max-Heap implementation. The highest priority order is always at the root.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⚖️</div>
+        <div class="feature-title">Weighted priority scoring</div>
+        <div class="feature-desc">Each order gets a score based on delivery type, zone, and customer tier. Express + Zone A + Premium always rises to the top.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🕐</div>
+        <div class="feature-title">Aging engine</div>
+        <div class="feature-desc">Orders waiting too long automatically gain priority every 10 seconds, preventing starvation — a real concept from OS process scheduling.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🚚</div>
+        <div class="feature-title">One-click dispatch</div>
+        <div class="feature-desc">The system always knows which order to dispatch next. One click extracts the max from the heap and logs it to the delivered history.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <div class="feature-title">JWT authentication</div>
+        <div class="feature-desc">Admin login and registration secured with JSON Web Tokens. Only authenticated users can add or dispatch orders.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <div class="feature-title">Persistent database</div>
+        <div class="feature-desc">All orders are stored in SQLite — data survives page refreshes and server restarts. Nothing is lost between sessions.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how">
+    <div class="how-inner">
+      <div class="how-heading">How it works</div>
+      <div class="how-sub">From order placement to delivery in four steps</div>
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <div class="step-title">Order is placed</div>
+            <div class="step-desc">Admin fills in the customer name, product, delivery type, zone, and tier. The system assigns a unique order ID.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <div class="step-title">Priority score is calculated</div>
+            <div class="step-desc">The backend computes a weighted score: type_score + zone_score + tier_score + age_factor. This becomes the heap key.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <div class="step-title">Inserted into Max-Heap</div>
+            <div class="step-desc">The order is inserted into the priority queue. The heap automatically repositions it so the highest priority order is always at the top.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div>
+            <div class="step-title">Dispatched in priority order</div>
+            <div class="step-desc">Clicking Dispatch extracts the root of the heap — always the highest priority order — and moves it to the delivered log.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="cta-title">Ready to manage orders?</div>
+    <div class="cta-sub">Login or create an admin account to get started</div>
+    <button class="btn-get-started" onclick="window.location.href='index.html'">Get Started</button>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div><span class="accent" style="font-family:'Syne',sans-serif;font-weight:800;">Order</span>Flow — E-Commerce Order Sorting &amp; Delivery Prioritisation System</div>
+    <div>Algorithms Project · CSE</div>
+  </footer>
+
+</body>
+</html>

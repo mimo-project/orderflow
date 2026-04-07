@@ -25,7 +25,7 @@ app.register_blueprint(orders_bp)
 # On Render + Netlify deployment, Netlify handles the frontend instead.
 @app.route("/")
 def index():
-    return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(app.static_folder, "landing.html")
 
 @app.route("/<path:path>")
 def static_files(path):
