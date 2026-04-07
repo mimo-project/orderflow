@@ -92,7 +92,6 @@
     <div class="tabs">
       <button class="tab active" data-tab="queue">Queue (0)</button>
       <button class="tab" data-tab="delivered">Delivered (0)</button>
-      <button class="tab" data-tab="heap">Heap view</button>
       <button class="tab" data-tab="log">Activity log</button>
     </div>
 
@@ -100,7 +99,7 @@
       <div class="table-wrap">
         <table><thead><tr>
           <th>Rank</th><th>Order ID</th><th>Customer</th><th>Product</th>
-          <th>Amount</th><th>Type</th><th>Zone</th><th>Tier</th>
+          <th>Total Amount</th><th>Type</th><th>Zone</th><th>Tier</th>
           <th>Priority</th><th></th>
         </tr></thead>
         <tbody id="queueBody"><tr><td colspan="10" class="empty-cell">Loading...</td></tr></tbody>
@@ -111,7 +110,7 @@
     <div id="panelDelivered" class="panel card hidden">
       <div class="table-wrap">
         <table><thead><tr>
-          <th>Order ID</th><th>Customer</th><th>Product</th><th>Amount</th>
+          <th>Order ID</th><th>Customer</th><th>Product</th><th>Total Amount</th>
           <th>Type</th><th>Zone</th><th>Tier</th><th>Priority</th><th>Delivered</th>
         </tr></thead>
         <tbody id="deliveredBody"><tr><td colspan="9" class="empty-cell">No orders dispatched yet</td></tr></tbody>
@@ -119,26 +118,8 @@
       </div>
     </div>
 
-    <div id="panelHeap" class="panel card hidden" style="padding:24px;">
-      <p class="muted" style="margin-bottom:20px;font-size:12px;">
-        Max-heap tree structure — each parent has higher priority than its children. Root = next to dispatch.
-      </p>
-      <svg id="heapSvg" width="100%" style="overflow:visible;"></svg>
-    </div>
-
     <div id="panelLog" class="panel card hidden" style="padding:16px;max-height:420px;overflow-y:auto;">
       <div id="logList"><div class="muted center-text">No activity yet</div></div>
-    </div>
-
-    <div class="formula-bar">
-      <span class="fg bold">Priority formula:</span>
-      <span>type_score (Express=50 / Standard=25 / Economy=10)</span>
-      <span class="sep">+</span>
-      <span>zone_score (A=15 / B=10 / C=5)</span>
-      <span class="sep">+</span>
-      <span>tier_score (Premium=20 / Regular=10 / Basic=5)</span>
-      <span class="sep">+</span>
-      <span style="color:#f59e0b">age_factor (min × 0.4, capped at 30) ← aging engine</span>
     </div>
 
   </main>

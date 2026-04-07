@@ -169,7 +169,7 @@ function renderQueue() {
       <td class="order-id-cell">${o.id}</td>
       <td>${o.customer}</td>
       <td style="color:var(--muted);font-size:12px">${o.product} ×${o.qty}</td>
-      <td style="font-weight:600">$${parseFloat(o.amount).toFixed(2)}</td>
+      <td style="font-weight:600">$${(parseFloat(o.amount) * parseInt(o.qty)).toFixed(2)}</td>
       <td>${badge(o.type, TYPE_COLOR[o.type])}</td>
       <td>${badge("Zone " + o.zone, ZONE_COLOR[o.zone])}</td>
       <td>${badge(o.tier, TIER_COLOR[o.tier])}</td>
@@ -194,7 +194,7 @@ function renderDelivered(rows) {
       <td class="order-id-delivered">${o.id}</td>
       <td>${o.customer}</td>
       <td style="color:var(--muted);font-size:12px">${o.product} ×${o.qty}</td>
-      <td style="font-weight:600">$${parseFloat(o.amount).toFixed(2)}</td>
+      <td style="font-weight:600">$${(parseFloat(o.amount) * parseInt(o.qty)).toFixed(2)}</td>
       <td>${badge(o.type, TYPE_COLOR[o.type])}</td>
       <td>${badge("Zone " + o.zone, ZONE_COLOR[o.zone])}</td>
       <td>${badge(o.tier, TIER_COLOR[o.tier])}</td>
@@ -237,52 +237,7 @@ function renderDispatch() {
 }
 
 // ── Render heap tree ──────────────────────────────────────────────────
-function renderHeapTree() {
-  const svg     = document.getElementById("heapSvg");
-  const nodes   = heap.heap;
-  const maxShow = Math.min(nodes.length, 15);
-  if (!maxShow) {
-    svg.setAttribute("viewBox", "0 0 680 60");
-    svg.innerHTML = `<text x="340" y="30" text-anchor="middle" fill="#6b7280" font-size="13" font-family="Inter,sans-serif">Heap is empty</text>`;
-    return;
-  }
-  const NODE_W = 90, NODE_H = 52, V_GAP = 48, SVG_W = 680;
-  const levels = Math.floor(Math.log2(maxShow)) + 1;
-  const SVG_H  = levels * (NODE_H + V_GAP) + NODE_H + 20;
-  const positions = [];
-  function layout(i, depth, offset, span) {
-    if (i >= maxShow) return;
-    positions[i] = { x: offset + span / 2, y: depth * (NODE_H + V_GAP) + 20 };
-    layout(2*i+1, depth+1, offset,           span/2);
-    layout(2*i+2, depth+1, offset+span/2,    span/2);
-  }
-  layout(0, 0, 0, SVG_W);
-  const colorAt = (i) => {
-    if (i === 0) return "#22c55e";
-    const p = Math.round(nodes[i]?.priority || 0);
-    return p > 75 ? "#e05a2b" : p > 45 ? "#f59e0b" : "#2b7be0";
-  };
-  let html = "";
-  for (let i = 0; i < maxShow; i++) {
-    if (!positions[i]) continue;
-    const { x, y } = positions[i];
-    const lc = 2*i+1, rc = 2*i+2;
-    if (lc < maxShow && positions[lc])
-      html += `<line x1="${x}" y1="${y+NODE_H}" x2="${positions[lc].x}" y2="${positions[lc].y}" stroke="#1e2433" stroke-width="1.5"/>`;
-    if (rc < maxShow && positions[rc])
-      html += `<line x1="${x}" y1="${y+NODE_H}" x2="${positions[rc].x}" y2="${positions[rc].y}" stroke="#1e2433" stroke-width="1.5"/>`;
-  }
-  for (let i = 0; i < maxShow; i++) {
-    if (!positions[i] || !nodes[i]) continue;
-    const { x, y } = positions[i]; const o = nodes[i]; const c = colorAt(i);
-    html += `<rect x="${x-NODE_W/2}" y="${y}" width="${NODE_W}" height="${NODE_H}" rx="8" fill="${c}22" stroke="${c}" stroke-width="${i===0?2:1}"/>
-      <text x="${x}" y="${y+16}" text-anchor="middle" dominant-baseline="middle" fill="${c}" font-size="10" font-weight="700" font-family="monospace">${o.id}</text>
-      <text x="${x}" y="${y+30}" text-anchor="middle" dominant-baseline="middle" fill="#e8eaf0" font-size="11" font-weight="600">P${Math.round(o.priority)}</text>
-      <text x="${x}" y="${y+44}" text-anchor="middle" dominant-baseline="middle" fill="#6b7280" font-size="9">${o.type} · ${o.tier}</text>`;
-  }
-  svg.setAttribute("viewBox", `0 0 ${SVG_W} ${SVG_H}`);
-  svg.innerHTML = html;
-}
+
 
 // ── Render log ────────────────────────────────────────────────────────
 function renderLog() {
@@ -305,7 +260,6 @@ function renderAll() {
   renderStats();
   renderDispatch();
   renderQueue();
-  renderHeapTree();
   renderLog();
 }
 
@@ -332,7 +286,7 @@ document.getElementById("agingToggle").addEventListener("click", () => {
 });
 
 // ── Tabs ──────────────────────────────────────────────────────────────
-const PANELS = { queue:"panelQueue", delivered:"panelDelivered", heap:"panelHeap", log:"panelLog" };
+const PANELS = { queue:"panelQueue", delivered:"panelDelivered", log:"panelLog" };
 document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -340,7 +294,6 @@ document.querySelectorAll(".tab").forEach(tab => {
     const target = tab.dataset.tab;
     Object.values(PANELS).forEach(id => document.getElementById(id).classList.add("hidden"));
     document.getElementById(PANELS[target]).classList.remove("hidden");
-    if (target === "heap")      renderHeapTree();
     if (target === "log")       renderLog();
     if (target === "delivered") loadDelivered();
   });
