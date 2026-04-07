@@ -36,7 +36,7 @@ async function api(path, method = "GET", body = null) {
 // ── State ─────────────────────────────────────────────────────────────
 const heap        = new MaxHeap();
 const activityLog = [];
-let   orderId     = 1;
+let   orderId     = Date.now();
 let   agingOn     = true;
 let   agingTimer  = null;
 let   newHighlightId = null;
